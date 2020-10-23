@@ -9,49 +9,37 @@ let x, y;
 var col
 var colors = [];
 var particleArray = [];
-let fr = 24
+let fr = 12
 var t = 0;
-// the canvas capturer instance
-var capturer 
-// capturer = new CCapture({
-//   format: "png",
-//   framerate: fr,
-//   name: "noise_visualization",
-//   quality: 100
-// });
-// const btn = document.querySelector('button')
+var cur_col = 0
+var outerEyeCol
+var innerEyeCol
 
 function setup() {
   let p5_canvas = createCanvas(1200 , 1200);
   canvas = p5_canvas.canvas
   frameRate(fr)
   addColors();
+  innerEyeCol = genColors(colors[0], -100)
+  innerEyeCol = genColors(colors[colors.length - 1], 100)
   grid()
-  if (capturer) capturer.start()
 }
 
 function draw() {
   grid()
   translate(width/2, height/2)
+  eyeShape(width/3, width/6, width/4, colors[0])
+  eyeShape(width/4, width/6, width/4, innerEyeCol)
   v = p5.Vector.random2D(1000, 1200).mult(400)
   makePolygons(v, 1)
   fill(0,0,0)
   ellipse(0,0,width/5,height/5);
-
+  eyeGlint(color(255))
   let secondsElapsed = frameCount/fr;
-  // console.log(secondsElapsed)
-  if( capturer ) {
-    capturer.capture( canvas );
-    if (secondsElapsed >= 5) { 
-      console.log('Saving') 
-      capturer.stop();  
-      capturer.save();
-    }
-  }
 }
 
 function makePolygons(v, mod) {
-  particleArray.push(new Polygon(x, y, t, v, mod));
+  particleArray.push(new CustomPolygon(x, y, t, v, mod));
   for (i=0; i<particleArray.length; i++) {
     particleArray[i].show(t);
   }
@@ -68,7 +56,6 @@ function grid() {
     for (var r = 0; r < rows; r++) {
         var XO = 0 + col * 50;
         var YO = 0 + r * 50;
-        // stroke('white')
         fill('black')
         stroke('#E062C4');
         // fill('#62E07F');
@@ -85,34 +72,61 @@ function genColors(c, offset) {
   newColor.setRed(red(c) * valueRatio)
   newColor.setGreen(green(c) * valueRatio);
   newColor.setBlue(blue(c) * valueRatio);
-  console.log(red(newColor), green(newColor), blue(newColor))
+  // console.log(red(newColor), green(newColor), blue(newColor))
   return newColor;
 }
 
 function addColors() {
-  let offset = 29
+  let offset = 5
   let c = color(random(1, 255), random(1, 255), random(1, 255))
+  // let c = color(208, 142, 77)
   colors[0] = c
-  for(let i = 1; i < 12; i++){
+  for(let i = 1; i < 30; i++){
     colors[i] = genColors(colors[i - 1], offset);
   }
   console.log(colors)
 }
 
-function getRandomColor() {
-  var i = Math.floor(random(colors.length));
-  var c = colors[i];
+function getNextColor() {
+  if (cur_col >= colors.length - 1) {
+    cur_col = 0
+  } else {
+    cur_col = cur_col + 1
+  }
+  var c = colors[cur_col];
   return c;
 
 }
 
-function Polygon(x, y, t, v, mod) {
+function eyeShape(edge1, edge2, edge3, eyeCol) {
+  fill(eyeCol, 120)
+  strokeWeight(0.5);
+  stroke(eyeCol);
+  beginShape();
+    vertex(-edge1,0);
+    bezierVertex(-edge2,-edge3,edge2,-edge3,edge1,0);
+    bezierVertex(edge2,edge3,-edge2,edge3,-edge1,0)
+  endShape();
+}
+
+function eyeGlint(eyeCol) {
+  fill(eyeCol, 120)
+  strokeWeight(0.5);
+  stroke(eyeCol);
+  beginShape();
+    vertex(50, 50)
+    rotate(-45)
+    bezierVertex(30,-70,-70,-90,20,0);
+  endShape();
+}
+
+function CustomPolygon(x, y, t, v, mod) {
   this.show = function(currentT) {
     _ratio = t / currentT;
     _alpha = map(_ratio, 0, 1, 0, 255); //points will fade out as time elaps    
-    col = getRandomColor();
+    col = getNextColor();
     noFill()
-    // fill(col, 120)
+    fill(col, _alpha)
     this.x = x;
     this.y = y;
     this.t = t;
@@ -130,20 +144,26 @@ function Polygon(x, y, t, v, mod) {
     beginShape();
       vertex(v.x, this.startY);
         for (let c=this.amount/2; c < this.amount; c++) {
-          var sinoffset = sin(this.frequency*c);
-          var sinX = c*(v.y/this.amount);
-          var sinY = (sinoffset*this.offset);
-          bezierVertex(sinX/mod,sinY/mod,sinX,sinY + 1,sinX,sinY/mod);
+          push();
+          // translate(this.frequency, height * 0.5);
+          rotate(frameCount / -1.0);
+          polygon(0, 0, 200, 12);
+          pop();
         }
     endShape();
   }
 }
 
-// function exportCCapture() {
-//   console.log('Saving capture')
-//   capturer.save()
-// }
-// btn.onclick = exportCCapture;
+function polygon(x, y, radius, npoints) {
+  let angle = TWO_PI / npoints;
+  beginShape();
+  for (let a = 0; a < TWO_PI; a += angle) {
+    let sx = x + cos(a) * radius;
+    let sy = y + sin(a) * radius;
+    vertex(sx, sy);
+  }
+  endShape(CLOSE);
+}
 
 /**
  * 
@@ -152,5 +172,7 @@ function Polygon(x, y, t, v, mod) {
  * [ 76, 44, 84, … ]
  * [ 143, 20, 124, … ]
  * [ 15, 41, 63, … ]
+ * [ 244, 186, 96, … ]
+ * [ 208, 142, 77, … ]
  * 
  */
