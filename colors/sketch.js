@@ -32,9 +32,9 @@ function draw() {
   eyeShape(width/4, width/6, width/4, innerEyeCol)
   v = p5.Vector.random2D(1000, 1200).mult(400)
   makePolygons(v, 1)
-  fill(0,0,0)
+  fill(0,0,0, 200)
   ellipse(0,0,width/5,height/5);
-  eyeGlint(color(255))
+  eyeGlint(color(255, 120))
   let secondsElapsed = frameCount/fr;
 }
 
@@ -56,7 +56,8 @@ function grid() {
     for (var r = 0; r < rows; r++) {
         var XO = 0 + col * 50;
         var YO = 0 + r * 50;
-        fill('black')
+        // fill('black')
+        fill(185, 208, 140)
         stroke('#E062C4');
         // fill('#62E07F');
         rect(XO, YO, 50, 50);
@@ -174,5 +175,7 @@ function polygon(x, y, radius, npoints) {
  * [ 15, 41, 63, … ]
  * [ 244, 186, 96, … ]
  * [ 208, 142, 77, … ]
+ * [ 185, 208, 140, … ]
+ * [ 202, 192, 2, … ]
  * 
  */
