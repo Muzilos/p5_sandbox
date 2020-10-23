@@ -9,7 +9,7 @@ let x, y;
 var col
 var colors = [];
 var particleArray = [];
-let fr = 60
+let fr = 24
 var t = 0;
 // the canvas capturer instance
 var capturer 
@@ -34,7 +34,10 @@ function draw() {
   grid()
   translate(width/2, height/2)
   v = p5.Vector.random2D(1000, 1200).mult(400)
-  makeRibbons(v)
+  makePolygons(v, 1)
+  fill(0,0,0)
+  ellipse(0,0,width/5,height/5);
+
   let secondsElapsed = frameCount/fr;
   // console.log(secondsElapsed)
   if( capturer ) {
@@ -47,8 +50,8 @@ function draw() {
   }
 }
 
-function makeRibbons(v) {
-  particleArray.push(new Ribbon(x, y, t, v));
+function makePolygons(v, mod) {
+  particleArray.push(new Polygon(x, y, t, v, mod));
   for (i=0; i<particleArray.length; i++) {
     particleArray[i].show(t);
   }
@@ -56,7 +59,7 @@ function makeRibbons(v) {
     // particleArray.shift();
     particleArray.shift()
   }
-  t += 1;
+  t += 0.01;
 }
 
 function grid() {
@@ -78,36 +81,22 @@ function genColors(c, offset) {
   let value = (red(c) + green(c) + blue(c))/3;
   let newValue = value + (2*random() * offset - offset);
   let valueRatio = newValue / value;
-  c.setRed(red(c) * valueRatio)
-  c.setGreen(green(c) * valueRatio);
-  c.setBlue(blue(c) * valueRatio);
-
-  return c;
+  let newColor = color(0,0,0)
+  newColor.setRed(red(c) * valueRatio)
+  newColor.setGreen(green(c) * valueRatio);
+  newColor.setBlue(blue(c) * valueRatio);
+  console.log(red(newColor), green(newColor), blue(newColor))
+  return newColor;
 }
 
 function addColors() {
-  let offset = 0
-  var c = color(random(1, 255), random(1, 255), random(1, 255))
-  console.log(c)
-  c =  genColors(c, offset);
-  console.log(c)
-  colors[0] = c;
-  c = genColors(c, offset);
-  colors[1] = c;
-  c = genColors(c, offset);
-  colors[2] = c;
-  c = genColors(c, offset);
-  colors[3] = c;
-  c = genColors(c, offset);
-  colors[4] = c;
-  c = genColors(c, offset);
-  colors[5] = c;
-  c = genColors(c, offset);
-  colors[6] = c;
-  c = genColors(c, offset);
-  colors[7] = c;
-  c = genColors(c, offset);
-  colors[8] = c;
+  let offset = 29
+  let c = color(random(1, 255), random(1, 255), random(1, 255))
+  colors[0] = c
+  for(let i = 1; i < 12; i++){
+    colors[i] = genColors(colors[i - 1], offset);
+  }
+  console.log(colors)
 }
 
 function getRandomColor() {
@@ -117,13 +106,13 @@ function getRandomColor() {
 
 }
 
-function Ribbon(x, y, t, v) {
+function Polygon(x, y, t, v, mod) {
   this.show = function(currentT) {
     _ratio = t / currentT;
     _alpha = map(_ratio, 0, 1, 0, 255); //points will fade out as time elaps    
     col = getRandomColor();
     noFill()
-    // fill(col)
+    // fill(col, 120)
     this.x = x;
     this.y = y;
     this.t = t;
@@ -144,7 +133,7 @@ function Ribbon(x, y, t, v) {
           var sinoffset = sin(this.frequency*c);
           var sinX = c*(v.y/this.amount);
           var sinY = (sinoffset*this.offset);
-          bezierVertex(sinX,sinY,sinX,sinY - 1,sinX,sinY);
+          bezierVertex(sinX/mod,sinY/mod,sinX,sinY + 1,sinX,sinY/mod);
         }
     endShape();
   }
@@ -155,3 +144,13 @@ function Ribbon(x, y, t, v) {
 //   capturer.save()
 // }
 // btn.onclick = exportCCapture;
+
+/**
+ * 
+ * [ 211, 140, 55, … ]
+ * [ 46, 236, 166, … ]
+ * [ 76, 44, 84, … ]
+ * [ 143, 20, 124, … ]
+ * [ 15, 41, 63, … ]
+ * 
+ */
