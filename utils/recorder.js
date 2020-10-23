@@ -2,6 +2,7 @@ const btn = document.querySelector('button'),
 chunks = [];
 
 function record() {
+  console.log('Started Recording')
   chunks.length = 0;
   let stream = document.querySelector('canvas').captureStream(30),
     recorder = new MediaRecorder(stream);
@@ -21,6 +22,7 @@ function record() {
 }
 
 function exportVideo(e) {
+  console.log('Exporting Recording')
   var blob = new Blob(chunks);
   var vid = document.createElement('video');
   vid.id = 'recorded'
