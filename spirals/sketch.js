@@ -74,8 +74,8 @@ function genColors(c, offset) {
 function addColors() {
   let offset = -30
   // let c = color(random(1, 255), random(1, 255), random(1, 255))
-  let c = color(36, 24, 46);
-  // let c = color(143, 20, 124)
+  // let c = color(36, 24, 46);
+  let c = color(143, 20, 124)
   colors[0] = c
   for(let i = 1; i < 3; i++){
     colors[i] = genColors(colors[i - 1], offset);
