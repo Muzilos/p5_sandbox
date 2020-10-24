@@ -6,29 +6,42 @@
 const cols = 30;
 const rows = 30;
 let x, y;
-var col
-var colors = [];
 var particleArray = [];
-let fr = 12
+let fr = 24
 var t = 0;
-var cur_col = 0
 var outerEyeCol
 var innerEyeCol
+
+var mainCol = new Colors()
+var bgCol = new Colors()
+var midCol = new Colors()
 
 function setup() {
   let p5_canvas = createCanvas(1200 , 1200);
   canvas = p5_canvas.canvas
   frameRate(fr)
-  addColors();
-  innerEyeCol = genColors(colors[0], -100)
-  innerEyeCol = genColors(colors[colors.length - 1], 100)
+  mainCol.addColors(5);
+  bgCol.addColors(15);
+  midCol.addColors(2);
+  innerEyeCol = mainCol.genColors(mainCol.colors[0], -100);
+  outerEyeCol = mainCol.genColors(mainCol.colors[mainCol.colors.length - 1], 100);
   grid()
 }
 
 function draw() {
-  grid()
+  // grid()
   translate(width/2, height/2)
-  eyeShape(width/3, width/6, width/4, colors[0])
+  
+  v = p5.Vector.random2D(width, height).mult(500)
+  bgPolygons(v, 150, midCol, 7)
+
+  v = p5.Vector.random2D(width, height).mult(1000)
+  bgPolygons(v, 500, bgCol,5)
+
+  fill(bgCol.getCol())
+  ellipse(0,0,width/1.4,height/1.4);
+
+  eyeShape(width/3, width/6, width/4, outerEyeCol)
   eyeShape(width/4, width/6, width/4, innerEyeCol)
   v = p5.Vector.random2D(1000, 1200).mult(400)
   makePolygons(v, 1)
@@ -50,6 +63,12 @@ function makePolygons(v, mod) {
   t += 0.01;
 }
 
+function bgPolygons(v, rad, col_ref, sides) {
+  fill(col_ref.getNextColor());
+  polygon(v.x, v.y, rad, sides)
+}
+
+
 function grid() {
   // background(0)
   for (let col = 0; col < cols; col++) {
@@ -65,39 +84,49 @@ function grid() {
   }
 }
 
-function genColors(c, offset) {
-  let value = (red(c) + green(c) + blue(c))/3;
-  let newValue = value + (2*random() * offset - offset);
-  let valueRatio = newValue / value;
-  let newColor = color(0,0,0)
-  newColor.setRed(red(c) * valueRatio)
-  newColor.setGreen(green(c) * valueRatio);
-  newColor.setBlue(blue(c) * valueRatio);
-  // console.log(red(newColor), green(newColor), blue(newColor))
-  return newColor;
-}
-
-function addColors() {
-  let offset = 5
-  let c = color(random(1, 255), random(1, 255), random(1, 255))
-  // let c = color(208, 142, 77)
-  colors[0] = c
-  for(let i = 1; i < 30; i++){
-    colors[i] = genColors(colors[i - 1], offset);
+function Colors() {
+  this.col
+  this.colors = [];
+  this.cur_col = 0;
+  
+  this.addColors = function(offset) {
+    let c = color(random(1, 255), random(1, 255), random(1, 255))
+    // let c = color(208, 142, 77)
+    this.colors[0] = c
+    for(let i = 1; i < 30; i++){
+      this.colors[i] = this.genColors(this.colors[i - 1], offset);
+    }
+    console.log(this.colors)
   }
-  console.log(colors)
-}
 
-function getNextColor() {
-  if (cur_col >= colors.length - 1) {
-    cur_col = 0
-  } else {
-    cur_col = cur_col + 1
+  this.getNextColor = function() {
+    if (this.cur_col >= this.colors.length - 1) {
+      this.cur_col = 0
+    } else {
+      this.cur_col = this.cur_col + 1
+    }
+    var c = this.colors[this.cur_col];
+    // stroke(c)
+    return c;
   }
-  var c = colors[cur_col];
-  return c;
 
+  this.genColors = function(c, offset) {
+    let value = (red(c) + green(c) + blue(c))/3;
+    let newValue = value + (2*random() * offset - offset);
+    let valueRatio = newValue / value;
+    let newColor = color(0,0,0)
+    newColor.setRed(red(c) * valueRatio)
+    newColor.setGreen(green(c) * valueRatio);
+    newColor.setBlue(blue(c) * valueRatio);
+    // console.log(red(newColor), green(newColor), blue(newColor))
+    return newColor;
+  }
+
+  this.getCol = function() {
+    return this.colors[this.cur_col]
+  }
 }
+
 
 function eyeShape(edge1, edge2, edge3, eyeCol) {
   fill(eyeCol, 120)
@@ -125,7 +154,7 @@ function CustomPolygon(x, y, t, v, mod) {
   this.show = function(currentT) {
     _ratio = t / currentT;
     _alpha = map(_ratio, 0, 1, 0, 255); //points will fade out as time elaps    
-    col = getNextColor();
+    col = mainCol.getNextColor();
     noFill()
     fill(col, _alpha)
     this.x = x;
@@ -133,6 +162,7 @@ function CustomPolygon(x, y, t, v, mod) {
     this.t = t;
   
     this.strokeW = 0.5;
+    stroke(col)
   
     this.amount = 90;
     this.frequency = random(0.9, 1.0) / 17;
@@ -177,5 +207,6 @@ function polygon(x, y, radius, npoints) {
  * [ 208, 142, 77, … ]
  * [ 185, 208, 140, … ]
  * [ 202, 192, 2, … ]
+ * [ 103, 190, 225, … ]
  * 
  */
