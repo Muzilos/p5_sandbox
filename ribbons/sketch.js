@@ -19,7 +19,7 @@ var capturer
 //   name: "noise_visualization",
 //   quality: 100
 // });
-const btn = document.querySelector('button')
+// const btn = document.querySelector('button')
 
 function setup() {
   let p5_canvas = createCanvas(1200 , 1200);
@@ -135,8 +135,8 @@ function Ribbon(x, y, t, v) {
   }
 }
 
-function exportCCapture() {
-  console.log('Saving capture')
-  capturer.save()
-}
-btn.onclick = exportCCapture;
+// function exportCCapture() {
+//   console.log('Saving capture')
+//   capturer.save()
+// }
+// btn.onclick = exportCCapture;
